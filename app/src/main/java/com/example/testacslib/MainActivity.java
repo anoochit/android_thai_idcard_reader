@@ -15,10 +15,13 @@ import com.acs.smartcard.Reader;
 import com.acs.smartcard.ReaderException;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
     UsbDevice usbDevice = null;
     int slotNum = 0;
+
+    Reader reader;
 
 
     @Override
@@ -28,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
         UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
 
-        Reader reader = new Reader(usbManager);
+        reader = new Reader(usbManager);
         Log.d("TAG", "on create");
 
         for (UsbDevice device : usbManager.getDeviceList().values()) {
@@ -101,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         readButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
 
                 byte[] cid = {(byte) 0x80, (byte) 0xB0, (byte) 0x00, (byte) 0x04, (byte) 0x02, (byte) 0x00, (byte) 0x0D};
                 byte[] cid_getdata = {(byte) 0x00, (byte) 0xC0, (byte) 0x00, (byte) 0x00, (byte) 0x0D};
@@ -214,10 +218,29 @@ public class MainActivity extends AppCompatActivity {
         }
 
         selectBytes = new byte[length];
-
-        System.arraycopy(input, index, selectBytes, 0, length);
+        System.arraycopy(input, index, selectBytes, 0, length-2);
 
         return showByteString(selectBytes);
+    }
+
+    // TODO : should read as string and bitmap image need fix
+    void getData(byte[] command) {
+        byte[] getData = {(byte) 0x00, (byte) 0xC0, (byte) 0x00, (byte) 0x00};
+        byte[] getDataCmd = Arrays.copyOf(getData, getData.length + 1);
+        System.arraycopy(command, (command.length - 1), getDataCmd, getData.length, 1);
+
+        byte[] response = new byte[500];
+        int responsLength;
+
+        try {
+            reader.transmit(slotNum, command, command.length, response, response.length);
+            responsLength = reader.transmit(slotNum, getDataCmd, getDataCmd.length, response, response.length);
+            Log.d("TAG", "Response byte - " + responsLength);
+            Log.d("TAG", byteArrayToHexString(response, 0, responsLength));
+        } catch (ReaderException e) {
+            Log.d("TAG", "ERROR");
+        }
+
     }
 
 
