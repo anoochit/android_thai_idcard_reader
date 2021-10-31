@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                 byte[] issue = {(byte) 0x80, (byte) 0xB0, (byte) 0x01, (byte) 0x67, (byte) 0x02, (byte) 0x00, (byte) 0x12};
                 byte[] issue_getdata = {(byte) 0x00, (byte) 0xC0, (byte) 0x00, (byte) 0x00, (byte) 0x12};
 
-                byte[] response = new byte[300];
+                byte[] response = new byte[500];
                 int responsLength;
 
                 try {
@@ -187,18 +187,17 @@ public class MainActivity extends AppCompatActivity {
         }
         Log.d("TAG", output.toString());
 
-        String x = null;
+        String result = null;
         try {
-            x = new String(input, "TIS620");
-            x.trim();
+            result = new String(input, "TIS620");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             Log.d("TAG", "Cannot parse!");
         }
         TextView textMessage = findViewById(R.id.textMessage);
-        String text = ((String) textMessage.getText()) + "\n" + x;
+        String text = ((String) textMessage.getText()) + "\n" + result;
         textMessage.setText(text);
-        return x;
+        return result;
     }
 
     void setText(String text) {
