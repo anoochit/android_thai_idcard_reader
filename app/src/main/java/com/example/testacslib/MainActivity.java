@@ -3,18 +3,23 @@ package com.example.testacslib;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.acs.smartcard.Reader;
 import com.acs.smartcard.ReaderException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.sql.Date;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
@@ -52,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
                     reader.open(usbDevice);
                     Log.d("TAG", "Connect - " + usbDevice.getDeviceName());
                     setText("Connect - " + usbDevice.getDeviceName());
+                    setText("Connect - please insert card");
                 } catch (IllegalArgumentException e) {
                     Log.e("TAG", e.getMessage());
                 }
@@ -118,8 +124,35 @@ public class MainActivity extends AppCompatActivity {
                 byte[] issue = {(byte) 0x80, (byte) 0xB0, (byte) 0x01, (byte) 0x67, (byte) 0x02, (byte) 0x00, (byte) 0x12};
                 byte[] issue_getdata = {(byte) 0x00, (byte) 0xC0, (byte) 0x00, (byte) 0x00, (byte) 0x12};
 
+
+                byte[][] picture = {
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x01, (byte) 0x7B, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x02, (byte) 0x7A, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x03, (byte) 0x79, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x04, (byte) 0x78, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x05, (byte) 0x77, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x06, (byte) 0x76, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x07, (byte) 0x75, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x08, (byte) 0x74, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x09, (byte) 0x73, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x0A, (byte) 0x72, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x0B, (byte) 0x71, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x0C, (byte) 0x70, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x0D, (byte) 0x6F, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x0E, (byte) 0x6E, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x0F, (byte) 0x6D, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x10, (byte) 0x6C, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x11, (byte) 0x6B, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x12, (byte) 0x6A, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x13, (byte) 0x69, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                        {(byte) 0x80, (byte) 0xB0, (byte) 0x14, (byte) 0x68, (byte) 0x02, (byte) 0x00, (byte) 0xFF},
+                };
+
+                byte[] picture_getdata = {(byte) 0x00, (byte) 0xC0, (byte) 0x00, (byte) 0x00, (byte) 0xFF};
+
+
                 byte[] response = new byte[500];
-                int responsLength;
+                int responsLength, index = 0;
 
                 try {
                     // cid
@@ -146,6 +179,27 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("TAG", "Response byte - " + responsLength);
                     Log.d("TAG", byteArrayToHexString(response, 0, responsLength));
 
+                    // image
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                    for (int i = 0; i < picture.length; i++) {
+                        reader.transmit(slotNum, picture[i], picture[i].length, response, response.length);
+                        responsLength = reader.transmit(slotNum, picture_getdata, picture_getdata.length, response, response.length);
+                        Log.d("TAG", "Response byte - " + i + " - " + responsLength);
+                        buffer.write(response, 0, responsLength - 2);
+                        index += responsLength - 2;
+                    }
+
+                    Log.d("TAG", "buffer size - " + buffer.size());
+                    //Log.d("TAG", "buffer - " + buffer.toString());
+
+                    byte[] pictureBuffer;
+                    pictureBuffer = buffer.toByteArray();
+                    while (index >= 0 && pictureBuffer[index - 1] == 0x20) index--;
+
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(pictureBuffer, 0, index);
+                    ImageView imageView = findViewById(R.id.imageView);
+                    imageView.setImageBitmap(bitmap);
+
                 } catch (ReaderException e) {
                     Log.d("TAG", "Error");
                 }
@@ -169,10 +223,16 @@ public class MainActivity extends AppCompatActivity {
         reader.setOnStateChangeListener(new Reader.OnStateChangeListener() {
             @Override
             public void onStateChange(int _slotNum, int _prevState, int _currState) {
-                Log.d("TAG", "state change listener");
+                Log.d("TAG", "State -> change listener");
                 Log.d("TAG", "slotNum -> " + _slotNum);
                 Log.d("TAG", "prevState -> " + _prevState);
                 Log.d("TAG", "currState -> " + _currState);
+                if (_prevState == 1 && _currState==2) {
+                    Log.d("TAG", "state - card inserted");
+                }
+                if (_prevState == 2 && _currState==1) {
+                    Log.d("TAG", "state - card removed");
+                }
                 slotNum = _slotNum;
             }
         });
@@ -187,9 +247,10 @@ public class MainActivity extends AppCompatActivity {
         }
         output = new StringBuilder();
         for (byte b : input) {
+
             output.append(String.format("%02x", b));
         }
-        Log.d("TAG", output.toString());
+        Log.d("TAG", "Byte String - " + output.toString());
 
         String result = null;
         try {
@@ -218,12 +279,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         selectBytes = new byte[length];
-        System.arraycopy(input, index, selectBytes, 0, length-2);
+        System.arraycopy(input, index, selectBytes, 0, length - 2);
 
         return showByteString(selectBytes);
     }
 
-    // TODO : should read as string and bitmap image need fix
+    /*
     void getData(byte[] command) {
         byte[] getData = {(byte) 0x00, (byte) 0xC0, (byte) 0x00, (byte) 0x00};
         byte[] getDataCmd = Arrays.copyOf(getData, getData.length + 1);
@@ -242,6 +303,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+    */
+
 
 
 }
