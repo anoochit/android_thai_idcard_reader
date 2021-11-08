@@ -6,4 +6,4 @@
 
 ## APU
 
- * [Thai ID Card APU](https://github.com/chakphanu/ThaiNationalIDCard/blob/master/APDU.md)
+ * [Thai ID Card APDU](https://github.com/chakphanu/ThaiNationalIDCard/blob/master/APDU.md)

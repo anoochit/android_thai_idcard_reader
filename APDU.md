@@ -1,4 +1,4 @@
-# Thailand ID Card APU
+# Thailand ID Card APDU
 
 Get response 0x00, 0xC0, 0x00, 0x00 + Len in hex
 
