@@ -25,7 +25,6 @@ import java.util.Arrays;
 public class MainActivity extends AppCompatActivity {
     UsbDevice usbDevice = null;
     int slotNum = 0;
-
     Reader reader;
 
 
@@ -165,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
                     reader.transmit(slotNum, person, person.length, response, response.length);
                     responsLength = reader.transmit(slotNum, person_getdata, person_getdata.length, response, response.length);
                     Log.d("TAG", "Response byte - " + responsLength);
-                    Log.d("TAG", byteArrayToHexString(response, 0, responsLength));
+                    Log.d("TAG", byteArrayToHexString(response, 0, responsLength-1));
 
                     // adddress
                     reader.transmit(slotNum, address, address.length, response, response.length);
@@ -285,6 +284,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /*
+    // get data by send only 1st apdu command
     void getData(byte[] command) {
         byte[] getData = {(byte) 0x00, (byte) 0xC0, (byte) 0x00, (byte) 0x00};
         byte[] getDataCmd = Arrays.copyOf(getData, getData.length + 1);
